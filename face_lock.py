@@ -10,6 +10,11 @@ import time
 import cv2
 import RPi.GPIO as GPIO
 
+from gpiozero import AngularServo, LED
+servo = AngularServo(23, )
+ledin = LED(21)
+
+ledout = LED(18)
 RELAY = 17
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -86,6 +91,7 @@ while True:
 			
 			# to unlock the door
 			GPIO.output(RELAY,GPIO.HIGH)
+			ledin.on()
 			prevTime = time.time()
 			doorUnlock = True
 			print("door unlock")
@@ -96,7 +102,6 @@ while True:
 			for i in matchedIdxs:
 				name = data["names"][i]
 				counts[name] = counts.get(name, 0) + 1
-
 			# determine the recognized face with the largest number
 			# of votes (note: in the event of an unlikely tie Python
 			# will select first entry in the dictionary)
@@ -107,12 +112,17 @@ while True:
 				currentname = name
 				print(currentname)
 
+				servo.angle = -90
+				time.sleep = 4
+				servo.angle = 90
+				
 		# update the list of names
 		names.append(name)
         
         #lock the door after 5 seconds
 	if doorUnlock == True and time.time() - prevTime > 5:
 		doorUnlock = False
+		ledin.off()
 		GPIO.output(RELAY,GPIO.LOW)
 		print("door lock")
 
